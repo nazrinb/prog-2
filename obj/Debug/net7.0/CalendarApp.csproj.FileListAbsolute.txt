@@ -1,0 +1,5 @@
+/Users/nbayramli/prog-2/CalendarApp/obj/Debug/net7.0/CalendarApp.csproj.AssemblyReference.cache
+/Users/nbayramli/prog-2/CalendarApp/obj/Debug/net7.0/CalendarApp.GeneratedMSBuildEditorConfig.editorconfig
+/Users/nbayramli/prog-2/CalendarApp/obj/Debug/net7.0/CalendarApp.AssemblyInfoInputs.cache
+/Users/nbayramli/prog-2/CalendarApp/obj/Debug/net7.0/CalendarApp.AssemblyInfo.cs
+/Users/nbayramli/prog-2/CalendarApp/obj/Debug/net7.0/CalendarApp.csproj.CoreCompileInputs.cache
