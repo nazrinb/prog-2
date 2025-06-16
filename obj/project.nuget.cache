@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Io6MSA9bgUg=",
+  "dgSpecHash": "Y6ycdwuLVi0=",
   "success": true,
-  "projectFilePath": "/Users/nbayramli/prog-2/CalendarApp/CalendarApp.csproj",
+  "projectFilePath": "/Users/nbayramli/Desktop/prog-2/CalendarApp.csproj",
   "expectedPackageFiles": [
     "/Users/nbayramli/.nuget/packages/atksharp/3.24.24.38/atksharp.3.24.24.38.nupkg.sha512",
     "/Users/nbayramli/.nuget/packages/cairosharp/3.24.24.38/cairosharp.3.24.24.38.nupkg.sha512",

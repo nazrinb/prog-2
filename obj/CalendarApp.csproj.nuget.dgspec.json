@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/nbayramli/prog-2/CalendarApp/CalendarApp.csproj": {}
+    "/Users/nbayramli/Desktop/prog-2/CalendarApp.csproj": {}
   },
   "projects": {
-    "/Users/nbayramli/prog-2/CalendarApp/CalendarApp.csproj": {
+    "/Users/nbayramli/Desktop/prog-2/CalendarApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/nbayramli/prog-2/CalendarApp/CalendarApp.csproj",
+        "projectUniqueName": "/Users/nbayramli/Desktop/prog-2/CalendarApp.csproj",
         "projectName": "CalendarApp",
-        "projectPath": "/Users/nbayramli/prog-2/CalendarApp/CalendarApp.csproj",
+        "projectPath": "/Users/nbayramli/Desktop/prog-2/CalendarApp.csproj",
         "packagesPath": "/Users/nbayramli/.nuget/packages/",
-        "outputPath": "/Users/nbayramli/prog-2/CalendarApp/obj/",
+        "outputPath": "/Users/nbayramli/Desktop/prog-2/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/nbayramli/.nuget/NuGet/NuGet.Config"
