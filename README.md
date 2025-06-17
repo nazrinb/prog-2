@@ -34,11 +34,9 @@ _To view or remove an event:_
 
 **Navigation:**
 
-Use the left/right arrows to switch months
-
-Colored backgrounds help identify days with events
-
-Data is saved automatically, even when you close the app
+- Use the left/right arrows to switch months
+- Colored backgrounds help identify days with events
+- Data is saved automatically, even when you close the app
 
 **Developer Documentation**
 
