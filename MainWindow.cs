@@ -9,32 +9,44 @@ namespace CalendarApp;
 
 public class EventDialog : Dialog
 {
-    private TextView eventTextView;
     private ComboBox categoryComboBox;
+    private Entry eventNameEntry;
     private List<string> categories = new List<string> { "Personal", "Work", "Other" };
     private DateTime selectedDate;
     private List<CalendarEvent> events;
     private string eventsFile;
+    private MainWindow mainWindow;
 
-    public EventDialog(Window parent, DateTime date, List<CalendarEvent> events, string eventsFile) 
+    public EventDialog(MainWindow parent, DateTime date, List<CalendarEvent> events, string eventsFile) 
         : base("Event Details", parent, DialogFlags.Modal)
     {
         this.selectedDate = date;
         this.events = events;
         this.eventsFile = eventsFile;
+        this.mainWindow = parent;
 
-        SetDefaultSize(400, 300);
-        this.BorderWidth = 10;
+        SetDefaultSize(500, 250);
+        this.BorderWidth = 15;
         this.WindowPosition = WindowPosition.Center;
 
-        var mainBox = new VBox(false, 10);
-        mainBox.BorderWidth = 10;
+        var mainBox = new VBox(false, 15);
+        mainBox.BorderWidth = 15;
         this.ContentArea.Add(mainBox);
 
-        // Date label
-        var dateLabel = new Label($"<span size='large' weight='bold' color='#023047'>{date.ToString("MMMM d, yyyy")}</span>");
+        // Date label with larger font
+        var dateLabel = new Label($"<span size='xx-large' weight='bold' color='#023047'>{date.ToString("MMMM d, yyyy")}</span>");
         dateLabel.UseMarkup = true;
         mainBox.PackStart(dateLabel, false, false, 0);
+
+        // Event name entry
+        var eventNameBox = new HBox(false, 10);
+        var eventNameLabel = new Label("<span color='#023047'>Event Name:</span>");
+        eventNameLabel.UseMarkup = true;
+        eventNameEntry = new Entry();
+        eventNameEntry.PlaceholderText = "Enter event name...";
+        eventNameBox.PackStart(eventNameLabel, false, false, 0);
+        eventNameBox.PackStart(eventNameEntry, true, true, 0);
+        mainBox.PackStart(eventNameBox, false, false, 0);
 
         // Category selection
         var categoryBox = new HBox(false, 10);
@@ -46,28 +58,12 @@ public class EventDialog : Dialog
         categoryBox.PackStart(categoryComboBox, true, true, 0);
         mainBox.PackStart(categoryBox, false, false, 0);
 
-        // Event text area
-        var scrolledWindow = new ScrolledWindow();
-        scrolledWindow.ShadowType = ShadowType.In;
-        scrolledWindow.SetSizeRequest(-1, 150);
-        eventTextView = new TextView();
-        eventTextView.Editable = true;
-        eventTextView.WrapMode = WrapMode.Word;
-        eventTextView.StyleContext.AddClass("event-text");
-        scrolledWindow.Add(eventTextView);
-        mainBox.PackStart(scrolledWindow, true, true, 0);
-
-        // Load existing events for this date
-        var dayEvents = events.Where(e => e.Date.Date == date.Date).ToList();
-        if (dayEvents.Any())
+        // Load existing event for this date
+        var existingEvent = events.FirstOrDefault(e => e.Date.Date == date.Date);
+        if (existingEvent != null)
         {
-            var eventText = string.Join("\n\n", dayEvents.Select(evt => 
-                $"Category: {evt.Category}\n{evt.Description}"));
-            eventTextView.Buffer.Text = eventText;
-            
-            // Set the category combo box to match the first event's category
-            var firstEvent = dayEvents.First();
-            var categoryIndex = categories.FindIndex(c => c.Equals(firstEvent.Category, StringComparison.OrdinalIgnoreCase));
+            eventNameEntry.Text = existingEvent.EventName;
+            var categoryIndex = categories.FindIndex(c => c.Equals(existingEvent.Category, StringComparison.OrdinalIgnoreCase));
             if (categoryIndex >= 0)
             {
                 categoryComboBox.Active = categoryIndex;
@@ -78,38 +74,91 @@ public class EventDialog : Dialog
         var buttonBox = new HBox(false, 10);
         mainBox.PackStart(buttonBox, false, false, 0);
 
-        var saveButton = new Button("Save");
+        var saveButton = new Button("Save Event");
         saveButton.StyleContext.AddClass("save-button");
         saveButton.Clicked += OnSaveClicked;
 
-        var clearButton = new Button("Clear");
+        var clearButton = new Button("Clear Event");
         clearButton.StyleContext.AddClass("clear-button");
         clearButton.Clicked += OnClearClicked;
 
-        var deleteButton = new Button("Delete");
-        deleteButton.StyleContext.AddClass("delete-button");
-        deleteButton.Clicked += OnDeleteClicked;
-
         buttonBox.PackStart(saveButton, true, true, 0);
         buttonBox.PackStart(clearButton, true, true, 0);
-        buttonBox.PackStart(deleteButton, true, true, 0);
 
         // Add CSS styling
         var cssProvider = new CssProvider();
         cssProvider.LoadFromData(@"
-            .event-text { 
-                background-color: white; 
-                color: #023047; 
+            * {
+                color: #023047;
+            }
+            .header { 
+                background-color: #023047;
+                border-radius: 0px;
+            }
+            .header label {
+                color: white;
+            }
+            .calendar { 
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(2, 48, 71, 0.1);
+            }
+            .calendar button {
+                padding: 8px;
+                margin: 2px;
+                border-radius: 4px;
+                color: #023047;
+            }
+            .calendar button:active {
+                background-color: rgba(33, 158, 188, 0.3);
+                color: #023047;
+            }
+            .calendar button:selected {
+                background-color: transparent;
+                color: #023047;
+            }
+            .calendar button:checked {
+                background-color: rgba(33, 158, 188, 0.3);
+                color: #023047;
+            }
+            .calendar label {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 12px;
+                color: #023047;
+            }
+            .calendar .header {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                font-weight: bold;
+                color: #023047;
+            }
+            .calendar button.day-with-event {
+                font-weight: bold;
+            }
+            .calendar button.day-with-event.personal {
+                color: #023047;
+                background-color: rgba(255, 183, 3, 0.3);
+            }
+            .calendar button.day-with-event.work {
+                color: #023047;
+                background-color: rgba(33, 158, 188, 0.3);
+            }
+            .calendar button.day-with-event.other {
+                color: #023047;
+                background-color: rgba(251, 133, 0, 0.3);
+            }
+            entry {
+                color: #023047;
+                padding: 5px;
+            }
+            entry:focus {
+                border-color: #219ebc;
             }
             .save-button { 
                 background-color: #219ebc; 
                 color: white; 
             }
             .clear-button { 
-                background-color: #ffb703; 
-                color: white; 
-            }
-            .delete-button { 
                 background-color: #fb8500; 
                 color: white; 
             }
@@ -121,37 +170,34 @@ public class EventDialog : Dialog
 
     private void OnSaveClicked(object? sender, EventArgs e)
     {
-        var description = eventTextView.Buffer.Text;
         var category = categories[categoryComboBox.Active];
+        var eventName = eventNameEntry.Text.Trim();
 
-        if (!string.IsNullOrWhiteSpace(description))
+        if (!string.IsNullOrWhiteSpace(eventName))
         {
-            // Remove existing events for this date
+            // Remove any existing event for this date
             events.RemoveAll(e => e.Date.Date == selectedDate.Date);
 
-            // Add new event
+            // Add new event with name and category
             events.Add(new CalendarEvent 
             { 
-                Date = selectedDate, 
-                Description = description,
+                Date = selectedDate,
+                EventName = eventName,
                 Category = category
             });
 
             SaveEvents();
+            mainWindow.UpdateCalendarColors(); // Update calendar immediately
             Respond(ResponseType.Ok);
         }
     }
 
     private void OnClearClicked(object? sender, EventArgs e)
     {
-        eventTextView.Buffer.Text = "";
-        categoryComboBox.Active = 0;
-    }
-
-    private void OnDeleteClicked(object? sender, EventArgs e)
-    {
+        // Remove any existing event for this date
         events.RemoveAll(e => e.Date.Date == selectedDate.Date);
         SaveEvents();
+        mainWindow.UpdateCalendarColors(); // Update calendar immediately
         Respond(ResponseType.Ok);
     }
 
@@ -173,14 +219,21 @@ public class EventDialog : Dialog
     }
 }
 
+public class CalendarEvent
+{
+    public DateTime Date { get; set; }
+    public string EventName { get; set; } = "";
+    public string Category { get; set; } = "Personal";
+}
+
 public class MainWindow : Window
 {
     private Calendar calendar;
     private List<CalendarEvent> events;
     private string eventsFile = "calendar_events.json";
-    private const int WINDOW_WIDTH = 450;
-    private const int WINDOW_HEIGHT = 450;
-    private const int PADDING = 15;
+    private const int WINDOW_WIDTH = 600;
+    private const int WINDOW_HEIGHT = 600;
+    private const int PADDING = 20;
     private Gdk.Color personalColor = new Gdk.Color(255, 165, 0);    // Orange
     private Gdk.Color workColor = new Gdk.Color(41, 128, 185);      // Dark Blue
     private Gdk.Color otherColor = new Gdk.Color(241, 196, 15);     // Yellow
@@ -247,55 +300,69 @@ public class MainWindow : Window
             .header { 
                 background-color: #023047;
                 border-radius: 0px;
+                padding: 15px;
             }
             .header label {
                 color: white;
+                font-size: 24px;
             }
             .calendar { 
                 background-color: white;
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(2, 48, 71, 0.1);
+                padding: 10px;
             }
-            .calendar button {
+            calendar {
+                color: #023047;
+                font-size: 16px;
+                padding: 10px;
+            }
+            calendar button {
+                color: #023047;
+                font-size: 16px;
+                padding: 10px;
+                border-radius: 6px;
+            }
+            calendar button.day {
                 padding: 8px;
                 margin: 2px;
-                border-radius: 4px;
-                color: #023047;
             }
-            .calendar button:active {
-                background-color: #219ebc;
-                color: white;
+            calendar button.day:hover {
+                background-color: rgba(2, 48, 71, 0.1);
             }
-            .calendar button:selected {
-                background-color: transparent;
-                color: #023047;
-            }
-            .calendar button:checked {
-                background-color: #219ebc;
-                color: white;
-            }
-            .calendar label {
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-size: 12px;
-                color: #023047;
-            }
-            .calendar .header {
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-size: 14px;
-                font-weight: bold;
-                color: #023047;
-            }
-            .calendar button.day-with-event {
+            calendar button.day.selected {
+                background-color: rgba(33, 158, 188, 0.4);
                 font-weight: bold;
             }
-            .calendar button.day-with-event.personal {
-                color: #ffb703;
+            calendar button.day.has-event {
+                background-color: rgba(255, 183, 3, 0.4);
+                border: 2px solid rgba(255, 183, 3, 0.8);
+                font-weight: bold;
             }
-            .calendar button.day-with-event.work {
-                color: #219ebc;
+            calendar.header {
+                font-size: 18px;
+                font-weight: bold;
+                padding: 10px;
             }
-            .calendar button.day-with-event.other {
-                color: #fb8500;
+            entry {
+                color: #023047;
+                padding: 8px;
+                font-size: 16px;
+            }
+            entry:focus {
+                border-color: #219ebc;
+            }
+            .save-button { 
+                background-color: #219ebc; 
+                color: white; 
+                padding: 10px;
+                font-size: 16px;
+            }
+            .clear-button { 
+                background-color: #fb8500; 
+                color: white; 
+                padding: 10px;
+                font-size: 16px;
             }
         ");
         StyleContext.AddProviderForScreen(Gdk.Screen.Default, cssProvider, 800);
@@ -341,39 +408,27 @@ public class MainWindow : Window
     private void CustomizeCalendar()
     {
         // Set header font
-        var headerFont = Pango.FontDescription.FromString("Segoe UI 14");
+        var headerFont = Pango.FontDescription.FromString("Segoe UI 18");
         calendar.StyleContext.AddClass("calendar-header");
         
         // Set day names font
-        var dayFont = Pango.FontDescription.FromString("Segoe UI 12");
-        calendar.StyleContext.AddClass("calendar-days");
+        var dayFont = Pango.FontDescription.FromString("Segoe UI 16");
+        calendar.StyleContext.AddClass("calendar");
         
         // Set numbers font
-        var numberFont = Pango.FontDescription.FromString("Segoe UI 12");
-        calendar.StyleContext.AddClass("calendar-numbers");
+        var numberFont = Pango.FontDescription.FromString("Segoe UI 16");
+        calendar.StyleContext.AddClass("calendar");
     }
 
-    private void UpdateCalendarColors()
+    public void UpdateCalendarColors()
     {
         var currentMonth = calendar.Date;
         var daysInMonth = DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
         
-        // Clear all marks and styles first
+        // Clear all marks first
         for (uint day = 1; day <= daysInMonth; day++)
         {
             calendar.UnmarkDay(day);
-            var styleContext = calendar.StyleContext;
-            styleContext.RemoveClass("day-with-event");
-            styleContext.RemoveClass("personal");
-            styleContext.RemoveClass("work");
-            styleContext.RemoveClass("other");
-        }
-
-        // Mark today
-        if (currentMonth.Year == DateTime.Now.Year && 
-            currentMonth.Month == DateTime.Now.Month)
-        {
-            calendar.MarkDay((uint)DateTime.Now.Day);
         }
 
         // Mark days with events
@@ -385,22 +440,7 @@ public class MainWindow : Window
         {
             var day = (uint)evt.Date.Day;
             calendar.MarkDay(day);
-
-            // Apply category-specific styling
-            var styleContext = calendar.StyleContext;
-            styleContext.AddClass("day-with-event");
-            switch (evt.Category.ToLower())
-            {
-                case "personal":
-                    styleContext.AddClass("personal");
-                    break;
-                case "work":
-                    styleContext.AddClass("work");
-                    break;
-                case "other":
-                    styleContext.AddClass("other");
-                    break;
-            }
+            calendar.StyleContext.AddClass("has-event");
         }
     }
 
@@ -443,11 +483,4 @@ public class MainWindow : Window
         Application.Quit();
         args.RetVal = true;
     }
-}
-
-public class CalendarEvent
-{
-    public DateTime Date { get; set; }
-    public string Description { get; set; } = "";
-    public string Category { get; set; } = "Personal";
 } 
